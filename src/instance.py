@@ -33,6 +33,6 @@ def load_from_file(filename: str) -> Instance:
         for k in range(K):
             line = lines[3 + n * K + k].split("   ")
             for (m, x) in enumerate(line):
-                P[n][m][k] = int(float(x)) 
+                R[n][m][k] = int(float(x)) 
 
     return Instance(N, M, K, p, P, R)
