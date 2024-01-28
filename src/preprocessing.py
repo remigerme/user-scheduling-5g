@@ -45,8 +45,11 @@ def lp_dominated_processing(instance: Instance):
         (ak, am) = a
         (bk, bm) = b
         (ck, cm) = c
-        if instance.P[n][ck][cm] - instance.P[n][bk][bm] == 0 or instance.P[n][bk][bm] - instance.P[n][ak][am] == 0:
-            return True
+        # lemma hypothesis
+        if not (instance.P[n][ak][am] < instance.P[n][bk][bm] < instance.P[n][ck][cm]):
+            return False
+        if not (instance.R[n][ak][am] < instance.R[n][bk][bm] < instance.R[n][ck][cm]):
+            return False
         left_term = (instance.R[n][ck][cm] - instance.R[n][bk][bm]) / (instance.P[n][ck][cm] - instance.P[n][bk][bm])
         right_term = (instance.R[n][bk][bm] - instance.R[n][ak][am]) / (instance.P[n][bk][bm] - instance.P[n][ak][am])
         return left_term >= right_term
