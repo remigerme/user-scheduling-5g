@@ -31,7 +31,7 @@ def load_from_file(filename: str) -> Instance:
     R = np.zeros((N, K, M), dtype=int)
     for n in range(N):
         for k in range(K):
-            line = lines[4 + n * K + k].split("   ")
+            line = lines[4 + N * K + n * K + k].split("   ")
             for (m, x) in enumerate(line):
                 R[n][k][m] = int(float(x)) 
 
