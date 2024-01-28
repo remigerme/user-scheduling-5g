@@ -24,14 +24,14 @@ def load_from_file(filename: str) -> Instance:
     P = np.zeros((N, M, K), dtype=int)
     for n in range(N):
         for k in range(K):
-            line = lines[3 + n * K + k].split("   ")
+            line = lines[4 + n * K + k].split("   ")
             for (m, x) in enumerate(line):
                 P[n][m][k] = int(float(x)) 
 
     R = np.zeros((N, M, K), dtype=int)
     for n in range(N):
         for k in range(K):
-            line = lines[3 + n * K + k].split("   ")
+            line = lines[4 + n * K + k].split("   ")
             for (m, x) in enumerate(line):
                 R[n][m][k] = int(float(x)) 
 
