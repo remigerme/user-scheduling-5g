@@ -40,4 +40,21 @@ def ip_dominated_processing(instance: Instance):
 
 
 def lp_dominated_processing(instance: Instance):
-    ...
+
+    def test_lemma(n: int, a: tuple[int, int], b: tuple[int, int], c: tuple[int, int]) -> bool:
+        (ak, am) = a
+        (bk, bm) = b
+        (ck, cm) = c
+        if instance.P[n][ck][cm] - instance.P[n][bk][bm] == 0 or instance.P[n][bk][bm] - instance.P[n][ak][am] == 0:
+            return True
+        left_term = (instance.R[n][ck][cm] - instance.R[n][bk][bm]) / (instance.P[n][ck][cm] - instance.P[n][bk][bm])
+        right_term = (instance.R[n][bk][bm] - instance.R[n][ak][am]) / (instance.P[n][bk][bm] - instance.P[n][ak][am])
+        return left_term >= right_term
+
+    for n in range(instance.N):
+        arg_sorted_Pkm = np.unravel_index(np.argsort(instance.P[n], axis = None), instance.P[n].shape)
+        pkm_list = list(zip(*arg_sorted_Pkm))
+        for i in range(1, len(pkm_list) - 1):
+            (pk, pm) = pkm_list[i]
+            if test_lemma(n, pkm_list[i - 1], (pk, pm), pkm_list[i + 1]):
+                remove_from(instance, n, pk, pm)
