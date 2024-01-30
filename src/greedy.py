@@ -9,12 +9,37 @@ def greedy(instance: Instance) -> Solution:
     p_left = instance.p
     e = get_triplets_e(instance)
     ie = 0
+    # We store the previously allocated m level for a given couple (N, K)
+    allocated_m = np.full((instance.N, instance.K), -1, dtype=int)
     while p_left > 0:
         (n, k, m) = e[ie]
-        p_current = min(p_left, instance.P[n][k][m])
-        p_left -= p_current
-        X[n][k][m] = p_current / instance.P[n][k][m]
-        ie += 1
+        previous_m = allocated_m[n][k]
+
+        # Computing how much power we need to invest to go from
+        # the previous m level to the new m level
+        if previous_m == -1:
+            effective_p = instance.P[n][k][m]
+        else:
+            effective_p = instance.P[n][k][m] - instance.P[n][k][previous_m]
+        p_current = min(p_left, effective_p)
+
+        # If we still have enough p_left to allocate on new m level
+        # We completely allocate it on m and stop using the previous m
+        # And we continue the algorithm
+        if p_current == effective_p:
+            p_left -= p_current
+            X[n][k][previous_m] = 0
+            X[n][k][m] = 1
+            allocated_m[n][k] = m
+            ie += 1
+
+        # If we do not have enough power left
+        # We cut the power in two so as two use everything we've got left
+        # And we stop the algorithm
+        else:
+            X[n][k][m] = (p_left - instance.P[n][k][previous_m]) / (instance.P[n][k][m] - instance.P[n][k][previous_m])
+            X[n][k][previous_m] = 1 - X[n][k][m]
+            p_left = 0
 
     return Solution(instance.N, instance.M, instance.K, instance.p, X)
 
@@ -82,6 +107,4 @@ from preprocessing import *
 quick_preprocessing(i)
 ip_dominated_processing(i)
 lp_dominated_processing(i)
-print(i.P)
-print(i.R)
-print(get_triplets_e(i))
+print(greedy(i).X)
