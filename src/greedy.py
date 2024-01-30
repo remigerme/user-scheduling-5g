@@ -11,6 +11,10 @@ def greedy(instance: Instance) -> Solution:
     ie = 0
     # We store the previously allocated m level for a given couple (N, K)
     allocated_m = np.full((instance.N, instance.K), -1, dtype=int)
+
+    if len(e) == 0:
+        raise Exception("No feasible solution")
+
     while p_left > 0:
         (n, k, m) = e[ie]
         previous_m = allocated_m[n][k]
