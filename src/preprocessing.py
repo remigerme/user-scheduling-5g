@@ -6,6 +6,12 @@ from instance import Instance
 INF = int(1e10)
 
 
+def preprocess(instance: Instance):
+    quick_preprocessing(instance)
+    ip_dominated_processing(instance)
+    lp_dominated_processing(instance)
+
+
 def remove_from(instance: Instance, n: int, k: int, m: int):
     instance.P[n][k][m] = INF
     instance.R[n][k][m] = 0
