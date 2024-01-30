@@ -100,11 +100,3 @@ def get_triplets_e(instance: Instance) -> list[tuple[int, int, int]]:
         p_lists.append(list(zip(n_to_zip, *arg_sorted_Pkm)))
     E = merge_sorted_lists(p_lists)    
     return E
-
-from instance import load_from_file
-i = load_from_file("testfiles/test1.txt")
-from preprocessing import *
-quick_preprocessing(i)
-ip_dominated_processing(i)
-lp_dominated_processing(i)
-print(greedy(i).X)
