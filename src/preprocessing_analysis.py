@@ -1,4 +1,4 @@
-from matplotlib.pyplot import plot, legend, show, xticks, title
+from matplotlib.pyplot import plot, legend, show, xticks, title, xlabel, ylabel
 
 from instance import Instance, load_from_file
 from preprocessing import quick_preprocessing, ip_dominated_processing, lp_dominated_processing
@@ -34,6 +34,8 @@ def show_graph():
         y.append(count_triplets(i) / tot)
         plot(x_positions, y, label=f"Test {n + 1}")
     xticks(x_positions, categories)
+    xlabel("Steps")
+    ylabel("Number of triplets still considered / Total number of triplets")
     title("Ratio evolution of triplets count after each step of preprocessing")
     legend()
     show()
