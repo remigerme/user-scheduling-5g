@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import numpy as np
 
+
 @dataclass
 class Instance:
     N: int
@@ -22,7 +23,9 @@ class Instance:
         """
         pkm_lists = []
         for n in range(self.N):
-            arg_sorted_Pkm = np.unravel_index(np.argsort(self.P[n], axis = None), self.P[n].shape)
+            arg_sorted_Pkm = np.unravel_index(
+                np.argsort(self.P[n], axis=None), self.P[n].shape
+            )
             pkm_list = list(zip(*arg_sorted_Pkm))
             pkm_lists.append(pkm_list)
         return pkm_lists
@@ -41,14 +44,14 @@ def load_from_file(filename: str) -> Instance:
     for n in range(N):
         for k in range(K):
             line = lines[4 + n * K + k].split("   ")
-            for (m, x) in enumerate(line):
-                P[n][k][m] = int(float(x)) 
+            for m, x in enumerate(line):
+                P[n][k][m] = int(float(x))
 
     R = np.zeros((N, K, M), dtype=int)
     for n in range(N):
         for k in range(K):
             line = lines[4 + N * K + n * K + k].split("   ")
-            for (m, x) in enumerate(line):
-                R[n][k][m] = int(float(x)) 
+            for m, x in enumerate(line):
+                R[n][k][m] = int(float(x))
 
-    return Instance(N, M, K, p, P, R)
+    return Instance(N, M, K, p, P, R, set())
