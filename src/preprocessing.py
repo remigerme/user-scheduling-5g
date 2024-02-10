@@ -34,10 +34,16 @@ def ip_dominated_processing(instance: Instance):
         )
         rkm_list = list(zip(*arg_sorted_Rkm))
         ir = 0
-        for pk, pm in pkm_list:
+        for ip, (pk, pm) in enumerate(pkm_list):
             if (n, pk, pm) in instance.removed:
                 continue
-            while rkm_list[ir] != (pk, pm):
+            # if current and next pkm both cost same power
+            # then we can remove the current one
+            same_cost = False
+            if ip + 1 < len(pkm_list):
+                pk_, pm_ = pkm_list[ip + 1]
+                same_cost = instance.P[n][pk][pm] == instance.P[n][pk_][pm_]
+            while ir < len(rkm_list) and (rkm_list[ir] != (pk, pm) or same_cost):
                 remove_from(instance, n, *rkm_list[ir])
                 ir += 1
             ir += 1
