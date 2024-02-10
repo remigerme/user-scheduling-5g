@@ -1,17 +1,15 @@
 from matplotlib.pyplot import plot, legend, show, xticks, title, xlabel, ylabel
 
 from instance import Instance, load_from_file
-from preprocessing import quick_preprocessing, ip_dominated_processing, lp_dominated_processing
+from preprocessing import (
+    quick_preprocessing,
+    ip_dominated_processing,
+    lp_dominated_processing,
+)
 
 
 def count_triplets(instance: Instance) -> int:
-    s = 0
-    for n in range(instance.N):
-        for k in range(instance.K):
-            for m in range(instance.M):
-                if instance.R[n][k][m] != 0:
-                    s += 1
-    return s
+    return instance.N * instance.K * instance.M - len(instance.removed)
 
 
 def show_graph():
@@ -19,7 +17,7 @@ def show_graph():
         "Initial",
         "After quick processing",
         "After removing \nIP-dominated terms",
-        "After removing \nLP-dominated terms"
+        "After removing \nLP-dominated terms",
     ]
     x_positions = range(len(categories))
     for n in range(5):
