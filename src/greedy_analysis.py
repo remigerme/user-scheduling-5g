@@ -84,7 +84,7 @@ def show_graph():
         ords = [data_rate(i, s), -solved.fun]
         rates.scatter(abs, ords, s=scale, label=f"Test {n + 1}")
         if n >= 3:
-            times.plot(
+            times.scatter(
                 x_positions, [greedy_duration, lp_duration], label=f"Test {n + 1}"
             )
         print(
