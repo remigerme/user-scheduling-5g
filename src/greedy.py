@@ -49,14 +49,17 @@ def greedy(instance: Instance) -> Solution:
 
 def get_triplets_e(instance: Instance) -> list[tuple[int, int, int]]:
     """
-    ...
+    Returns a list L of triplets (n, k, m)
+    sorted by decreasing value of associated e.
+    e(L[0]) >= e(L[1]) >= ...
     """
 
     def merge_sorted_lists(
         lists: list[list[tuple[int, int, int]]]
     ) -> list[tuple[int, int, int]]:
         """
-        Inputs : a list of N lists, each composed of L triplets
+        Inputs : a list of N lists, each composed of L triplets already sorted
+                 by increasing value of pkm
         Outputs : sorted triplets according to the corresponding values of e_l,n
         """
 
@@ -68,6 +71,10 @@ def get_triplets_e(instance: Instance) -> list[tuple[int, int, int]]:
             )
 
         def get_maximum(lists, counters) -> tuple[int, tuple[int, int, int]]:
+            """
+            Get the triplet which maximizes e and return it
+            and also the indice from the list it is extracted from
+            """
             i_max = 0
             e_max = -1
             for n, c in enumerate(counters):
