@@ -38,7 +38,9 @@ def greedy(instance: Instance) -> Solution:
         # We cut the power in two so as two use everything we've got left
         # And we stop the algorithm
         else:
-            X[n][k][m] = (p_left - instance.P[n][k][previous_m]) / (instance.P[n][k][m] - instance.P[n][k][previous_m])
+            X[n][k][m] = (p_left - instance.P[n][k][previous_m]) / (
+                instance.P[n][k][m] - instance.P[n][k][previous_m]
+            )
             X[n][k][previous_m] = 1 - X[n][k][m]
             p_left = 0
 
@@ -50,29 +52,33 @@ def get_triplets_e(instance: Instance) -> list[tuple[int, int, int]]:
     ...
     """
 
-    def merge_sorted_lists(lists: list[list[tuple[int, int, int]]]) -> list[tuple[int, int, int]]:
+    def merge_sorted_lists(
+        lists: list[list[tuple[int, int, int]]]
+    ) -> list[tuple[int, int, int]]:
         """
         Inputs : a list of N lists, each composed of L triplets
         Outputs : sorted triplets according to the corresponding values of e_l,n
         """
 
-        def e(na, ka, ma, nb = None, kb = None, mb = None):
+        def e(na, ka, ma, nb=None, kb=None, mb=None):
             if nb is None:
                 return instance.R[na][ka][ma] / instance.P[na][ka][ma]
-            return (instance.R[na][ka][ma] - instance.R[nb][kb][mb]) / (instance.P[na][ka][ma] - instance.P[nb][kb][mb])
+            return (instance.R[na][ka][ma] - instance.R[nb][kb][mb]) / (
+                instance.P[na][ka][ma] - instance.P[nb][kb][mb]
+            )
 
-        def get_maximum(lists, counters, L) -> tuple[int, tuple[int, int, int]]:
+        def get_maximum(lists, counters) -> tuple[int, tuple[int, int, int]]:
             i_max = 0
-            e_max = 0
-            for (n, c) in enumerate(counters):
+            e_max = -1
+            for n, c in enumerate(counters):
                 # Checking if counter in bounds
-                if c >= L:
+                if c >= len(lists[n]):
                     continue
                 # Checking if considering useful values (and not removed by preprocessing)
                 (n_, k, m) = lists[n][c]
-                if instance.R[n_][k][m] == 0:
+                if (n_, k, m) in instance.removed:
                     continue
-                # Getting the minimum
+                # Getting the maximum
                 if c == 0:
                     ev = e(n_, k, m)
                 else:
@@ -80,24 +86,22 @@ def get_triplets_e(instance: Instance) -> list[tuple[int, int, int]]:
                 if ev > e_max:
                     i_max = n
                     e_max = ev
-            removed_values_only = e_max == 0
+            removed_values_only = e_max == -1
             return (removed_values_only, i_max, lists[i_max][counters[i_max]])
 
         R = []
-        N = len(lists)
-        L = len(lists[0])
-        counters = [0] * N
-        (removed_values_only, i, triplet) = get_maximum(lists, counters, L)
+        counters = [0] * instance.N
+        (removed_values_only, i, triplet) = get_maximum(lists, counters)
         while not removed_values_only:
             counters[i] += 1
             R.append(triplet)
-            (removed_values_only, i, triplet) = get_maximum(lists, counters, L)
+            (removed_values_only, i, triplet) = get_maximum(lists, counters)
         return R
 
-    p_lists = []
-    for n in range(instance.N):
-        arg_sorted_Pkm = np.unravel_index(np.argsort(instance.P[n], axis = None), instance.P[n].shape)
-        n_to_zip = [n] * instance.K * instance.M # to get triplets (n, k, m) instead of (k, m) couples
-        p_lists.append(list(zip(n_to_zip, *arg_sorted_Pkm)))
-    E = merge_sorted_lists(p_lists)    
+    pkm_lists = instance.get_sorted_pkm()
+    # adding n to go from (k, m) to (n, k, m)
+    p_lists = [
+        [(n, k, m) for (k, m) in pkm_list] for (n, pkm_list) in enumerate(pkm_lists)
+    ]
+    E = merge_sorted_lists(p_lists)
     return E
