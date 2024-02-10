@@ -87,7 +87,9 @@ def get_triplets_e(instance: Instance) -> list[tuple[int, int, int]]:
                     i_max = n
                     e_max = ev
             removed_values_only = e_max == -1
-            return (removed_values_only, i_max, lists[i_max][counters[i_max]])
+            if removed_values_only:
+                return (True, None, (None, None, None))
+            return (False, i_max, lists[i_max][counters[i_max]])
 
         R = []
         counters = [0] * instance.N
