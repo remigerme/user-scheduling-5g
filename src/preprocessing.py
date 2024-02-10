@@ -13,8 +13,6 @@ def preprocess(instance: Instance):
 
 
 def remove_from(instance: Instance, n: int, k: int, m: int):
-    instance.P[n][k][m] = INF
-    instance.R[n][k][m] = 0
     instance.removed.add((n, k, m))
 
 
