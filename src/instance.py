@@ -18,7 +18,7 @@ class Instance:
     def get_sorted_pkm(self) -> list[list[tuple[int, int]]]:
         """
         Returns a list L of length N such as L[n]
-        contains couples (k, m) ordered by increasing
+        contains non-removed couples (k, m) ordered by increasing
         values of P[n][k][m].
         """
         pkm_lists = []
@@ -26,7 +26,11 @@ class Instance:
             arg_sorted_Pkm = np.unravel_index(
                 np.argsort(self.P[n], axis=None), self.P[n].shape
             )
-            pkm_list = list(zip(*arg_sorted_Pkm))
+            pkm_list = [
+                couple
+                for couple in zip(*arg_sorted_Pkm)
+                if (n, *couple) not in self.removed
+            ]
             pkm_lists.append(pkm_list)
         return pkm_lists
 
