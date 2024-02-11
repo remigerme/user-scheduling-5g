@@ -4,27 +4,74 @@ from instance import Instance
 from solution import Solution
 
 
+"""
+Note : despite our best efforts, these DP do not work :(
+"""
+
+
 def dp(instance: Instance) -> Solution:
     p_max, N, K, M = instance.p, instance.N, instance.K, instance.M
-    D = np.zeros((p_max + 1, N + 1, K + 1, M + 1), dtype=int)
-    PM = np.zeros((p_max + 1, N + 1, K + 1), dtype=int)
-    for p in range(1, p_max + 1):
-        for n in range(1, N + 1):
-            D[p][n][0][M] = D[p][n - 1][K][M]
-            for k in range(1, K + 1):
-                D[p][n][k][0] = D[p][n][k - 1][M]
-                for m in range(1, M + 1):
-                    previous_value = D[p][n][k][m - 1]
-                    current_cost = instance.P[n - 1][k - 1][m - 1]
-                    if current_cost <= p:
-                        increment_value = instance.R[n - 1][k - 1][m - 1]
-                        if PM[p][n][k] > 0:
-                            increment_value -= instance.R[n - 1][k - 1][PM[p][n][k] - 1]
 
-                        current_value = D[p - current_cost][N][K][M] + increment_value
-                        if current_value >= previous_value:
-                            D[p][n][k][m] = current_value
-                            PM[p][n][k] = m
-                    else:
-                        # No need to update PM[p][n][k]
-                        D[p][n][k][m] = previous_value
+    # First step : compute max data rate of each subproblem
+    # We consider subproblems where we allow
+    # the use of channels <= n and a power <= p (both 1 indexed)
+    pkm_lists = instance.get_sorted_pkm()
+    D = np.zeros((N + 1, p_max + 1), dtype=int)
+    for n, pkm_list in enumerate(pkm_lists):
+        for p in range(1, p_max + 1):
+            for k, m in pkm_list:
+                if p >= instance.P[n][k][m]:
+                    D[n + 1][p] = max(
+                        D[n][p],
+                        D[n + 1][p],
+                        instance.R[n][k][m] + D[n][p - instance.P[n][k][m]],
+                    )
+                # Once one Pnkm is too big, all the next ones are too
+                # Cause they are sorted in increasing order
+                else:
+                    break
+
+    # Second step : we determine the optimal solution
+    # from the previously computed array of subproblems
+    X = np.zeros((N, K, M), dtype=int)
+    p = p_max
+    previous_p = p_max + 1
+
+    while p != previous_p:
+        previous_p = p
+        for n, pkm_list in enumerate(pkm_lists):
+            # Channel n is not allocated
+            if D[n + 1][p] == D[n][p]:
+                continue
+            for k, m in pkm_list:
+                # (k, m) is the best couple for channel n
+                if D[n + 1][p] == instance.R[n][k][m] + D[n][p - instance.P[n][k][m]]:
+                    # not considering intermediate subproblem solutions
+                    X[n][k][m] = 1
+                    p -= instance.P[n][k][m]
+                    break
+
+    return Solution(N, M, K, p_max, X)
+
+
+def dp_bis(instance: Instance, U: int) -> Solution:
+    p_max, N, K, M = instance.p, instance.N, instance.K, instance.M
+
+    # First step : compute min power for each subproblem
+    # We consider subproblems where we allow
+    # the use of channels <= n and a data rate <= r (both 1 indexed)
+    pkm_lists = instance.get_sorted_pkm()
+    INF = p_max + 1
+    D = np.full((N + 1, U + 1), INF, dtype=int)
+    for n in range(N + 1):
+        D[n][0] = 0
+    for n, pkm_list in enumerate(pkm_lists):
+        for r in range(1, U + 1):
+            D[n + 1][r] = D[n][r]
+            for k, m in pkm_list:
+                if r >= instance.R[n][k][m]:
+                    D[n + 1][r] = min(
+                        D[n + 1][r],
+                        D[n][r - instance.R[n][k][m]] + instance.P[n][k][m],
+                    )
+    return D[N][U]
