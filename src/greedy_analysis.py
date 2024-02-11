@@ -19,15 +19,12 @@ def get_A(instance: Instance) -> np.ndarray:
     A_cost = np.ndarray.flatten(instance.P)
     A_channel = np.zeros(N * N * K * M)
     for n in range(N):
-        A_channel[n * K * M : (n + 1) * K * M] = 1
+        A_channel[(n * N + n) * K * M : (n * N + n + 1) * K * M] = 1
     A = np.concatenate((A_cost, A_channel))
     return np.reshape(A, (N + 1, N * K * M))
 
 
 def solve(instance: Instance) -> OptimizeResult:
-    """
-    Use this function without preprocessing !
-    """
     c = get_c(instance)
     A = get_A(instance)
     b = np.full(instance.N + 1, 1, dtype=int)
@@ -55,7 +52,7 @@ def power_used(instance: Instance, solution: Solution) -> float:
 
 
 def show_graph():
-    scale = [30, 10]
+    scale = [50, 15]
     fig, (rates, times) = plt.subplots(1, 2)
     categories = ["Greedy", "LP solver"]
     x_positions = range(len(categories))
@@ -70,7 +67,7 @@ def show_graph():
         greedy_duration = time() - greedy_start
         abs = [power_used(i, s) / i.p, 1 - solved.slack[0] / i.p]
         ords = [data_rate(i, s), -solved.fun]
-        rates.scatter(abs, ords, s=scale, label=f"Test {n + 1}")
+        rates.scatter(abs, ords, s=scale, label=f"Test {n + 1}", edgecolors="black")
         if n >= 3:
             times.scatter(
                 x_positions, [greedy_duration, lp_duration], label=f"Test {n + 1}"
@@ -86,7 +83,6 @@ def show_graph():
 
     # Plotting rates
     rates.set_title("Greedy (wide dots) vs\nScipy LP solver (small dots)")
-    rates.set_xlim(0.7, rates.get_xlim()[1])
     rates.set_yscale("log")
     rates.set_xlabel("Power used / Total available power")
     rates.set_ylabel("Total data rate")
