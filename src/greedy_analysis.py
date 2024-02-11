@@ -11,30 +11,17 @@ from greedy import greedy
 
 
 def get_c(instance: Instance) -> np.ndarray:
-    """
-    Use this function without preprocessing !
-    """
-    R = np.copy(instance.R)
-    # Incremental version of R
-    for n in range(instance.N):
-        for k in range(instance.K):
-            for m in range(instance.M - 1, 0, -1):
-                R[n][k][m] = R[n][k][m] - R[n][k][m - 1]
-    return np.ndarray.flatten(R)
+    return np.ndarray.flatten(instance.R)
 
 
 def get_A(instance: Instance) -> np.ndarray:
-    """
-    Use this function without preprocessing !
-    """
-    P = np.copy(instance.P)
-    # Incremental version of P
-    for n in range(instance.N):
-        for k in range(instance.K):
-            for m in range(instance.M - 1, 0, -1):
-                P[n][k][m] = P[n][k][m] - P[n][k][m - 1]
-    A_vector = np.ndarray.flatten(P)
-    return np.reshape(A_vector, (1, instance.N * instance.K * instance.M))
+    N, K, M = instance.N, instance.K, instance.M
+    A_cost = np.ndarray.flatten(instance.P)
+    A_channel = np.zeros(N * N * K * M)
+    for n in range(N):
+        A_channel[n * K * M : (n + 1) * K * M] = 1
+    A = np.concatenate((A_cost, A_channel))
+    return np.reshape(A, (N + 1, N * K * M))
 
 
 def solve(instance: Instance) -> OptimizeResult:
@@ -43,7 +30,8 @@ def solve(instance: Instance) -> OptimizeResult:
     """
     c = get_c(instance)
     A = get_A(instance)
-    b = np.full(1, instance.p, dtype=int)
+    b = np.full(instance.N + 1, 1, dtype=int)
+    b[0] = instance.p
     # Careful : linprog minimizes, we want to maximize
     return linprog(-c, A_ub=A, b_ub=b, bounds=(0, 1))
 
